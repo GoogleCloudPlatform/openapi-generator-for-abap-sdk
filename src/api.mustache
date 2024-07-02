@@ -1,0 +1,94 @@
+{{#operations}}  
+{{#operation}}
+{{#-first}}
+CLASS zcl_{{classname}} DEFINITION.
+{{/-first}}
+{{/operation}}
+{{/operations}}
+ {{>inheritance}}
+  PUBLIC SECTION.
+  CONSTANTS c_service_name TYPE /goog/service_name VALUE '{{classname}}'.
+  CONSTANTS c_version TYPE string VALUE '{{version}}'.
+{{#operations}}
+  {{#operation}}
+    {{#-first}}
+      {{#servers}}
+  CONSTANTS c_root_url TYPE string VALUE '{{url}}'.
+      {{/servers}}
+    {{/-first}}
+  {{/operation}}
+{{/operations}}
+  CONSTANTS c_path_prefix TYPE string VALUE ''.
+  INTERFACES zif_{{appName}}
+  TYPES: ty_t_string TYPE STANDARD TABLE of string.
+  {{#operations}}
+  {{#operation}}
+  METHODS {{operationId}}
+  IMPORTING
+  {{#allParams}}
+    {{#isBodyParam}}
+      !is_input TYPE zif_{{appName}}~{{dataType}} OPTIONAL 
+    {{/isBodyParam}}
+    {{#isPathParam}}
+    !{{baseName}} TYPE {{dataType}} OPTIONAL
+    {{/isPathParam}}
+    {{#isQueryParam}}
+      !{{baseName}} TYPE {{dataType}} OPTIONAL
+    {{/isQueryParam}}
+  {{/allParams}}
+  EXPORTING
+    !es_raw             TYPE data
+    !es_output          TYPE zif_{{appName}}~{{returnType}}
+    !ev_ret_code        TYPE i
+    !ev_err_text        TYPE string
+    !es_err_resp        TYPE /goog/err_resp 
+  RAISING
+    /goog/cx_sdk .
+  {{/operation}}
+  {{/operations}}
+{{>std_methods}}
+ENDCLASS.
+{{#operations}}  
+{{#operation}}
+{{#-first}}
+CLASS zcl_{{classname}} IMPLEMENTATION.  
+{{/-first}}
+{{/operation}}
+{{/operations}}
+{{>constructor}}
+{{#operations}}
+{{#operation}}
+METHOD {{operationId}}.
+{{>method_begin}}
+{{#allParams}}
+{{^isArray}}
+    IF {{baseName}} IS NOT INITIAL.
+      lv_temp = {{baseName}}.
+      lv_uri = lv_uri && '{{paramName}}' && '=' && lv_temp.
+      lv_uri = lv_uri && '&'.
+    ENDIF.
+{{/isArray}}
+{{#isArray}}
+    IF {{baseName}} IS NOT INITIAL.
+      CLEAR lv_temp.
+      LOOP AT {{baseName}} INTO lv_str.
+        IF lv_temp IS INITIAL.
+          lv_temp = lv_str.
+        ELSE.
+          lv_temp = lv_temp && ',' && lv_str.
+        ENDIF.
+      ENDLOOP.
+      lv_uri = lv_uri && '{{paramName}}' && '=' && lv_temp.
+      lv_uri = lv_uri && '&'.
+    ENDIF.
+  {{/isArray}}
+ {{#isBodyParam}}
+ {{>json_for_post}}
+ {{/isBodyParam}} 
+{{/allParams}}
+{{>http_call}}
+ENDMETHOD.
+{{/operation}}
+{{/operations}}
+{{>close_method}}
+ENDCLASS.

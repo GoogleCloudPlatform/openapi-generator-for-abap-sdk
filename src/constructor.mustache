@@ -1,0 +1,25 @@
+METHOD constructor.
+************************************************************************************************************************
+* Copyright 2023 Google LLC                                                                                            *
+* ABAP SDK for Google Cloud is made available as "Software" under the agreement governing your use of                  *
+* Google Cloud Platform including the Service Specific Terms available at                                              *
+*                                                                                                                      *
+* https://cloud.google.com/terms/service-terms                                                                         *
+*                                                                                                                      *
+* Without limiting the generality of the above terms, you may not modify or distribute ABAP SDK for Google Cloud       *
+* without express written permission from Google.                                                                      *
+************************************************************************************************************************
+    DATA: lv_endpoint        TYPE string,
+          lv_endpoint_suffix TYPE string.
+
+    lv_endpoint = c_root_url.
+    lv_endpoint_suffix = c_path_prefix.
+
+    super->constructor( iv_key             = iv_key_name
+                        iv_endpoint        = lv_endpoint
+                        iv_endpoint_suffix = lv_endpoint_suffix
+                        iv_service_name    = c_service_name
+                        iv_log_obj         = iv_log_obj
+                        iv_log_subobj      = iv_log_subobj ).
+
+ENDMETHOD.

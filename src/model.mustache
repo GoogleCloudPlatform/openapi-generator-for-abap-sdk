@@ -1,0 +1,28 @@
+{{#models}}
+{{#model}}
+TYPES: 
+"! <p class="shorttext synchronized" lang="en">{{classFilename}}</p>
+{{#vars}}{{#-first}}BEGIN OF {{/-first}}{{/vars}}{{newClassVarName}}{{#vars}}{{#-first}},{{/-first}}{{/vars}}{{^vars}} TYPE {{dataType}}.{{/vars}}
+{{#vars}}
+{{^isArray}}
+{{baseName}} TYPE {{dataType}}, {{{description}}}
+{{/isArray}}
+{{#isArray}}
+{{baseName}} TYPE STANDARD TABLE OF {{complexType}} WITH NON-UNIQUE DEFAULT KEY, {{{description}}}
+{{/isArray}}
+{{/vars}}
+{{#vars}}
+{{#-first}}
+END OF {{newClassVarName}}. 
+{{/-first}}
+{{/vars}}
+*end_of_type*
+{{#vars}}
+{{#-first}}
+{{#imports}}
+IMPORT: {{{.}}}
+{{/imports}}
+{{/-first}}
+{{/vars}}
+{{/model}}
+{{/models}}

@@ -1,0 +1,45 @@
+************************************************************************************************************************
+* Copyright 2023 Google LLC                                                                                            *
+* ABAP SDK for Google Cloud is made available as "Software" under the agreement governing your use of                  *
+* Google Cloud Platform including the Service Specific Terms available at                                              *
+*                                                                                                                      *
+* https://cloud.google.com/terms/service-terms                                                                         *
+*                                                                                                                      *
+* Without limiting the generality of the above terms, you may not modify or distribute ABAP SDK for Google Cloud       *
+* without express written permission from Google.                                                                      *
+************************************************************************************************************************
+*& ID: {{importPath}}                                                                                   
+************************************************************************************************************************
+    DATA: lv_uri        TYPE string,
+          lv_temp       TYPE string,
+          lv_offset     TYPE i,
+          lv_json_final TYPE string,
+          lv_mid        TYPE string,
+          ls_output     LIKE es_output,
+          lv_response   TYPE string,
+          lv_str        TYPE string.
+          
+    DATA: ls_common_qparam TYPE /goog/s_http_keys.
+
+    lv_uri = gv_endpoint_suffix && |{{path}}|.
+    IF gt_common_qparams IS NOT INITIAL.
+      lv_uri = lv_uri && '?'.
+      LOOP AT gt_common_qparams INTO ls_common_qparam.
+        IF ls_common_qparam-name IS NOT INITIAL AND
+          ls_common_qparam-value IS NOT INITIAL.
+          lv_uri = lv_uri && ls_common_qparam-name && '=' && ls_common_qparam-value.
+          lv_uri = lv_uri && '&'.
+        ENDIF.
+      ENDLOOP.
+      lv_uri = substring( val = lv_uri off = 0 len = strlen( lv_uri ) - 1 ).
+    ENDIF.
+    IF gt_common_qparams IS INITIAL.
+      lv_uri = lv_uri && '?'.
+    ELSE.
+      lv_uri = lv_uri && '&'.
+    ENDIF.
+
+    CONCATENATE c_service_name
+                '#'
+                '{{importPath}}{{path}}'
+                INTO lv_mid.
