@@ -14,15 +14,23 @@
 
 #!/bin/bash
 
+#Remove any existing zip file
+starting_dir=$(pwd)
+cd out
+echo -e "Removing any previously generated zip file"
+rm -f Abap_Classes.zip
+cd ..
 cd out/gen_output/src/org/openapitools/api/
 zip -r ../Abap_Classes.zip *
 
 sleep 2
-
 cd ~
-cd openapi-abap-gen/open-api-generator/out/
+cd ${starting_dir}/out/
 mv gen_output/src/org/openapitools/Abap_Classes.zip .
 zip -u Abap_Classes.zip interface.txt
 
 sleep 2
-cloudshell download Abap_Classes.zip
+cloudshell download Abap_Classes.zip 2>/dev/null
+if [ $? -ne 0 ]; then
+ echo -e "Error in downloading zip file, you can find the zip file in folder: openapi-abap-gen/out/"
+fi

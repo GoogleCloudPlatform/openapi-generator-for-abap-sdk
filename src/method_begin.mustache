@@ -1,23 +1,29 @@
-************************************************************************************************************************
-* Copyright 2023 Google LLC                                                                                            *
-* ABAP SDK for Google Cloud is made available as "Software" under the agreement governing your use of                  *
-* Google Cloud Platform including the Service Specific Terms available at                                              *
-*                                                                                                                      *
-* https://cloud.google.com/terms/service-terms                                                                         *
-*                                                                                                                      *
-* Without limiting the generality of the above terms, you may not modify or distribute ABAP SDK for Google Cloud       *
-* without express written permission from Google.                                                                      *
-************************************************************************************************************************
+**************************************************************************
 *& ID: {{importPath}}                                                                                   
-************************************************************************************************************************
+**************************************************************************
     DATA: lv_uri        TYPE string,
-          lv_temp       TYPE string,
-          lv_offset     TYPE i,
           lv_json_final TYPE string,
           lv_mid        TYPE string,
           ls_output     LIKE es_output,
-          lv_response   TYPE string,
-          lv_str        TYPE string.
+          lv_response   TYPE string.
+    
+    {{#pathParams}}
+    {{#-first}}
+    DATA: lv_temp   TYPE string,
+          lv_offset TYPE i,
+          lv_str    TYPE string.
+    {{/-first}}
+    {{/pathParams}}
+
+    {{^pathParams}}
+    {{#queryParams}}
+    {{#-first}}
+    DATA: lv_temp   TYPE string,
+          lv_offset TYPE i,
+          lv_str    TYPE string.
+    {{/-first}}
+    {{/queryParams}}
+    {{/pathParams}}
           
     DATA: ls_common_qparam TYPE /goog/s_http_keys.
 
@@ -33,13 +39,14 @@
       ENDLOOP.
       lv_uri = substring( val = lv_uri off = 0 len = strlen( lv_uri ) - 1 ).
     ENDIF.
+    {{#queryParams}}
+    {{#-first}}
     IF gt_common_qparams IS INITIAL.
       lv_uri = lv_uri && '?'.
     ELSE.
       lv_uri = lv_uri && '&'.
     ENDIF.
+    {{/-first}}
+    {{/queryParams}}
 
-    CONCATENATE c_service_name
-                '#'
-                '{{importPath}}{{path}}'
-                INTO lv_mid.
+

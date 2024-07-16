@@ -103,7 +103,7 @@ main() {
   # Get the current directory
   current_directory=$(pwd)
 
-  output_folder=maps_output
+  output_folder=gen_output
   # Get the name of the directory to read files from
   directory_name="$output_folder/src/org/openapitools/model"
   # Check if the directory exists
