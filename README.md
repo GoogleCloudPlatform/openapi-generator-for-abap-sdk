@@ -21,11 +21,11 @@ Consequently, to effectively utilize the ABAP classes to invoke the API methods,
     - [1.1 - Compatibility](#11---compatibility)
     - [1.2 - Download JAR](#12---download-jar)
     - [1.3 - Download Installation Script](#13---download-installation-script)
-    - [1.4 - Execution Installation Script](#14---execute-installation-script)
+    - [1.4 - Execute Installation Script](#14---execute-installation-script)
   - [2 - Getting Started](#2---getting-started)
   - [3 - Usage](#3---usage)
-    - [3.1 - Upload to Cloud Storage](#31---customization)
-    - [3.2 - Download Directly](#32---workflow-integration-maven-gradle-github-cicd)
+    - [3.1 - Upload to Cloud Storage](#31---upload-to-cloud-storage)
+    - [3.2 - Direct Download](#32---direct-download)
     - [3.3 - Force Execution Mode](#34---force-execution-mode)
   - [4 - Ideas/Applications](#4---ideasapplications)
 
@@ -81,7 +81,7 @@ chmod +x install_abap_gen.sh
 
 The installation script makes the necessary changes to ready the OpenAPI generator to generate ABAP SDK for Google Cloud compatible ABAP Clients(Classes)
 
-### [1.4 -Execute Installation Script](#table-of-contents)
+### [1.4 - Execute Installation Script](#table-of-contents)
 
 Once you have downloaded the installation script and provided it with execution permissions, you can go ahead and execute it on your Cloud Shell with below command:
 ```
@@ -143,7 +143,7 @@ To validate and store the files to the give bucket you would need relevant IAM r
 - Storage Object Viewer(roles/storage.objectViewer)
 - Storage Object User(roles/storage.objectUser)
 
-### [3.2 - Download Directly](#table-of-contents)
+### [3.2 - Direct Download](#table-of-contents)
 
 If the `start_abap_gen.sh` script has executed successfully (with option -b or without), at the end it will ask if you would like to download the generated files.\
 To download the generated files, you can enter `y`, if you do not want to download the files please enter `n`.\
