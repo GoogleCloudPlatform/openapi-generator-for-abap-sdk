@@ -21,6 +21,12 @@ echo -e "Removing any previously generated zip file"
 rm -f Abap_Classes.zip
 cd ..
 cd out/gen_output/src/org/openapitools/api/
+if ls -A | grep -q .; then
+    echo -e "API files found..."
+else
+    echo -e "$(tput bold)$(tput setaf 1)ERROR: No API files found!$(tput sgr0) $(tput sgr0) "
+    exit 1
+fi
 zip -r ../Abap_Classes.zip *
 
 sleep 2

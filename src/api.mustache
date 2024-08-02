@@ -15,13 +15,28 @@ CLASS zcl_{{classname}} DEFINITION
   TYPES: ty_t_string TYPE STANDARD TABLE of string.
   {{#operations}}
   {{#operation}}
+  {{#vendorExtensions}}
+  {{#x-type-name}}
+  TYPES: {{x-type-name}} TYPE STANDARD TABLE OF {{x-type-def}} WITH NON-UNIQUE DEFAULT KEY.
+  {{/x-type-name}}
+  {{/vendorExtensions}}
+  {{/operation}}
+  {{/operations}}
+  
+  {{#operations}}
+  {{#operation}}
   METHODS {{operationId}}
   {{#allParams}}
     {{#-first}}
     IMPORTING
     {{/-first}}
     {{#isBodyParam}}
-      !is_input TYPE zif_{{appName}}~{{dataType}} OPTIONAL 
+    {{#isModel}}
+      !is_input TYPE zif_{{appName}}~{{dataType}} OPTIONAL
+    {{/isModel}}
+    {{^isModel}}
+        !is_input TYPE {{dataType}} OPTIONAL
+    {{/isModel}} 
     {{/isBodyParam}}
     {{#isPathParam}}
     !{{baseName}} TYPE {{dataType}} OPTIONAL
@@ -33,7 +48,17 @@ CLASS zcl_{{classname}} DEFINITION
   EXPORTING
     !es_raw             TYPE data
     {{#hasProduces}}
+    {{#returnProperty}}
+    {{#isString}}
+    !es_output TYPE {{dataType}}
+    {{/isString}}
+    {{#isContainer}}
+    !es_output          TYPE {{returnType}}
+    {{/isContainer}}
+    {{#isModel}}
     !es_output          TYPE zif_{{appName}}~{{returnType}}
+    {{/isModel}}
+    {{/returnProperty}}
     {{/hasProduces}}
     {{^hasProduces}}
     !es_output TYPE {{returnType}}
@@ -110,7 +135,7 @@ METHOD {{operationId}}.
 
     CONCATENATE c_service_name
                 '#'
-                '{{importPath}}{{path}}'
+                '{{importPath}}{{operationId}}'
                 INTO lv_mid.
 
 {{#allParams}}
