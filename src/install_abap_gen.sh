@@ -128,18 +128,6 @@ execute_generator(){
     run_command "java -cp out/generators/abap-gen/target/abap-gen-openapi-generator-1.0.0.jar:openapi-generator-cli.jar org.openapitools.codegen.OpenAPIGenerator generate -g abap-gen -i https://raw.githubusercontent.com/googlemaps/openapi-specification/main/dist/google-maps-platform-openapi3.json -o ./out/maps_output" "Successfully executed OpenAPI Generator!" "Failed to execute OpenAPI generator!"
 }
 
-pull_from_gerrit(){
-    add_comment "Cloning gerrit repo..."
-    run_command "git clone $repo_url" "Git repository cloned successfully!" "Failed to clone Git repository"
-
-    add_comment "Reorganizing folder structure..."
-    run_command "rm sap-abap-oas-generator/my_file.mustache"
-    run_command "mv sap-abap-oas-generator/*.mustache out/generators/abap-gen/src/main/resources/abap-gen"
-    run_command "mv sap-abap-oas-generator/*.java out/generators/abap-gen/src/main/java/com/my/company/codegen"
-    run_command "mv sap-abap-oas-generator/type_collector.sh out"
-    run_command "mv sap-abap-oas-generator/*.sh ." "Successfully completed reorganization!" "Failed to reorganize the repository structure"
-}
-
 pull_from_github(){
     github_repo_url="GoogleCloudPlatform/openapi-generator-for-abap-sdk"
     github_repo_name="openapi-generator-for-abap-sdk"
@@ -173,8 +161,6 @@ cleanup(){
 
 main() {
 
-    #clear
-
     # Process command-line options
     while getopts ":hv" option; do
         case $option in
@@ -184,11 +170,9 @@ main() {
         esac
     done
 
-
     echo "================================================================"
     echo -e "$(tput bold)Install Open API Client Generator for ABAP SDK for Google Cloud$(tput sgr0)"
     echo "================================================================"
-    # create_target_folder
 
     add_comment "Run packaged parent generator..."
     run_command "java -jar openapi-generator-cli.jar meta -o out/generators/abap-gen -n abap-gen -p com.my.company.codegen" "Successfully ran packaged parent generator!" "Failed to run packaged parent generator!"
@@ -197,11 +181,8 @@ main() {
     verify_prerequisites 
     
     cd ../../..
-    # run_command "mvn package -DskipTests"
-    # execute_generator
 
     pull_from_github
-    # pull_from_gerrit
     cleanup
     echo "================================================================"
 }
