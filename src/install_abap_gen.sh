@@ -14,7 +14,6 @@
 
 #!/bin/bash
 verbose=""
-repo_url="sso://partner-code/sap-abap-oas-generator"
 
 # Constants for version checking (adjust if needed)
 REQUIRED_JAVA_VERSION="11"
@@ -142,8 +141,8 @@ pull_from_gerrit(){
 }
 
 pull_from_github(){
-    github_repo_url="satish-inamdar/exp_new_xx001"
-    github_repo_name="exp_new_xx001"
+    github_repo_url="GoogleCloudPlatform/openapi-generator-for-abap-sdk"
+    github_repo_name="openapi-generator-for-abap-sdk"
 
     add_comment "Cloning github repo..."
     run_command "gh repo clone $github_repo_url" "Git repository cloned successfully!" "Failed to clone Git repository"
