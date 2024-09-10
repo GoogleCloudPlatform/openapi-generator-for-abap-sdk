@@ -1,20 +1,32 @@
 <h1 align="center">OpenAPI Generator for ABAP SDK for Google Cloud</h1>
 
-:warning: If the OpenAPI specification is obtained from an untrusted source or environment, please make sure you've reviewed these inputs before using OpenAPI Generator for ABAP SDK to generate the API clients(ABAP Classes & Interface) to avoid potential security issues (e.g. [code injection](https://en.wikipedia.org/wiki/Code_injection)).  :warning:
+## Introduction
+![alt_text](images/open_api_gen_overview.jpg "Open API Generator for ABAP SDK - Overview")
+
+For SAP customers who require services to be hosted on Google Cloud Platform, currently to consume such services within SAP in ABAP layer traditionally, this has more often necessitated third-party middleware for connection and invocation, adding complexity. 
+The Open API Generator for ABAP SDK for Google Cloud addresses this by offering native integration within the ABAP layer on SAP. This empowers SAP customers to directly host their services on Google Cloud Platform, eliminating the need for additional middleware.
+
+>>In essence, the Open API Generator for ABAP SDK transforms an Open API specification into ABAP code, facilitating the consumption of Google Cloud hosted services directly from within ABAP. The generated code seamlessly integrates with the ABAP SDK for Google Cloud, leveraging its robust client framework.
+
+Leveraging the Open API Generator for ABAP SDK empowers SAP customers to achieve significant benefits some of which are listed below:
+- **Streamlined IT Landscape**: By removing the reliance on external middleware, the complexity of your IT environment is reduced. This translates to simplified system management and maintenance, freeing up valuable resources.
+
+- **Enhanced Agility**: The ability to effortlessly consume external services hosted on Google Cloud Platform boosts your organizational agility. You can rapidly integrate new services without extensive development cycles, accelerating business process innovation and optimization.
+
+- **Simplified Development**: The native ABAP integration eliminates the need to learn new technologies or languages. Your development teams can leverage their existing ABAP expertise, further streamlining the integration process and reducing development costs.
 
 ## Overview
 
-OpenAPI Generator for ABAP SDK for Google Cloud allows generation of API client libraries (SDK generation) automatically given an [OpenAPI Spec](https://github.com/OAI/OpenAPI-Specification) (both 2.0 and 3.0 are supported). \
-The generator accepts both file supported file formats of Open API Specification(OAS): YAML & JSON.\
-The generator creates API Clients, which are ABAP Classes that inherit from ABAP SDK for Google Cloud's HTTP Client Class: `/GOOG/CL_HTTP_CLIENT`
-
-The generated classes are compatible with [ABAP SDK for Google Cloud](https://cloud.google.com/solutions/sap/docs/abap-sdk/on-premises-or-any-cloud/whats-new).
-
-Consequently, to effectively utilize the ABAP classes to invoke the API methods, ABAP SDK for Google Cloud should be installed in your SAP system. This installation is a prerequisite.
+ - OpenAPI Generator for ABAP SDK for Google Cloud allows generation of API client libraries (SDK generation) automatically given an [OpenAPI Spec](https://github.com/OAI/OpenAPI-Specification) (both 2.0 and 3.0 are supported). 
+- The generator accepts both file supported file formats of Open API Specification(OAS): YAML & JSON. 
+- The generator creates API Clients, which are ABAP Classes that inherit from ABAP SDK for Google Cloud's HTTP Client Class: `/GOOG/CL_HTTP_CLIENT`. 
+- The generated classes are compatible with [ABAP SDK for Google Cloud](https://cloud.google.com/solutions/sap/docs/abap-sdk/on-premises-or-any-cloud/whats-new). 
+- To effectively utilize the ABAP classes to invoke the API methods, ABAP SDK for Google Cloud should be installed in your SAP system. This installation is a prerequisite.
    
 ## Table of contents
 
   - [OpenAPI Generator](#openapi-generator)
+  - [Introduction](#introduction)
   - [Overview](#overview)
   - [Table of Contents](#table-of-contents)
   - [1 - Installation](#1---installation)
@@ -31,35 +43,33 @@ Consequently, to effectively utilize the ABAP classes to invoke the API methods,
 
 ## [1 - Installation](#table-of-contents)
 
-All the below installation steps are provided with Google Cloud Shell as the environment.\
-Google Cloud Shell is a developer ready environment that's comes up with all the dependecies for execution OpenAPI generator pre-installed.\
-To get started, go to Google Cloud Platform and activate the Cloud Shell.\
-If you are new to Cloud Shell then you can read more about [Using Cloud Shell](https://cloud.google.com/shell/docs/using-cloud-shell)
+All the below installation steps are provided with Google Cloud Shell as the environment. Google Cloud Shell is a developer ready environment that's comes up with all the dependecies for execution OpenAPI generator pre-installed. To get started, go to Google Cloud Platform and activate the Cloud Shell. If you are new to Cloud Shell then you can read more about [Using Cloud Shell](https://cloud.google.com/shell/docs/using-cloud-shell)
 
 ### [1.1 - Compatibility](#table-of-contents)
 
-OpenAPI Spec compatibility: 2.0, 3.0, 
+OpenAPI Spec compatibility: 2.0 and 3.0 
 
 ### [1.2 - Download JAR](#table-of-contents)
 
 To begin with, we will create a directory(folder) on Cloud Shell and use it as our repository to install, configure and generate the API Client Stubs.
 
-As a first step, run the following command on your Google Cloud Shell
-
+**STEP #1:** Run the following command on your Google Cloud Shell
 ```
 mkdir openapi-abap-gen
 ```
 
-Install the latest stable JAR version of openapi generator cli. \
-The current most stable version is 7.7.0. \
+Install the latest stable JAR version of openapi generator cli. The current most stable version is 7.7.0. \
 JAR location: `https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli/7.7.0/openapi-generator-cli-7.7.0.jar`\
-To do this go to the `openapi-abap-gen` directory by executing the below command:
+
+**STEP #2:** Go to the created directory by running the below command
 ```
 cd openapi-abap-gen
 ```
 
-Once your inside the directory, execute the below command:
+_Note_: always create this directory with the provided name: `openapi-abap-gen` as the helper scripts will look for this directory
 
+
+**STEP #3:** Install the Open API Generator
 ```
 wget https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli/7.7.0/openapi-generator-cli-7.7.0.jar -O openapi-generator-cli.jar
 ```
@@ -67,16 +77,18 @@ wget https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli/7.7.0
 ### Installation Script
 
 ### [1.3 - Download Installation Script](#table-of-contents)
-Download the installation script by executing the below command:
 
-```
-https://raw.githubusercontent.com/GoogleCloudPlatform/oas-generator-abap-sdk-for-google-cloid/main/src/install_abap_gen.sh
-```
-Once you have downloaded the installation script, provide it with execution permission.\
-You can do this by executing the below command:
+Download the installation script from the Github: https://raw.githubusercontent.com/GoogleCloudPlatform/openapi-generator-for-abap-sdk/main/src/install_abap_gen.sh
 
+Alternatively you can download it using the following command
+**STEP #1:**
 ```
-chmod +x install_abap_gen.sh
+wget https://raw.githubusercontent.com/GoogleCloudPlatform/openapi-generator-for-abap-sdk/main/src/install_abap_gen.sh
+```
+
+**STEP #2:** Provide required permissions
+```
+chmod 755 install_abap_gen.sh
 ```
 
 The installation script makes the necessary changes to ready the OpenAPI generator to generate ABAP SDK for Google Cloud compatible ABAP Clients(Classes)
@@ -84,6 +96,8 @@ The installation script makes the necessary changes to ready the OpenAPI generat
 ### [1.4 - Execute Installation Script](#table-of-contents)
 
 Once you have downloaded the installation script and provided it with execution permissions, you can go ahead and execute it on your Cloud Shell with below command:
+
+**STEP 1:**
 ```
 ./install_abap_gen.sh
 ```
@@ -91,24 +105,40 @@ Once you have downloaded the installation script and provided it with execution 
 This automatically clones this repo in your `openapi-abap-gen` directory and copies required files and mustache templates into relevant sub-directories.
 It also downloads other required scripts required to perform various other operations.
 
-Once you have successfully executed the installation script provide execute permissions to other scripts that are now available.
+Once you have successfully executed the installation script provide execute permissions to other helper scripts that are now available.
+
+**STEP 2:**
 ```
-chmod +x start_abap_gen.sh
-chmod +x download_client.sh
+chmod 755 start_abap_gen.sh
+chmod 755 download_client.sh
 ```
 
 ## [2 - Getting Started](#table-of-contents)
 
-To generate an ABAP client for [petstore.yaml](https://raw.githubusercontent.com/openapitools/openapi-generator/master/modules/openapi-generator/src/test/resources/3_0/petstore.yaml), please run the following
+To create an ABAP client based on your OpenAPI specification file, execute the following command:
+```
+./start_abap_gen.sh -i <Path to OpenAPI specification File>
+```
+
+The -i option designates the input OpenAPI specification. This specification can be a web-based file or a locally stored file. If it's a local file, ensure to provide the complete file path, including the file name.
+
+In the example below, we're using the publicly available OpenAPI specification for the sample Petstore API [petstore.yaml](https://raw.githubusercontent.com/openapitools/openapi-generator/master/modules/openapi-generator/src/test/resources/3_0/petstore.yaml), please run the following command:
+
 ```
 ./start_abap_gen.sh \
  -i https://raw.githubusercontent.com/openapitools/openapi-generator/master/modules/openapi-generator/src/test/resources/3_0/petstore.yaml 
 ```
 
 The -i option takes the input for Open API Spec.\
+
 The Open API Spec can be stored locally as well, in that case the correct relative path has to be provided along with the file name.\
 In the above example we are passing the Open API Spec for the sampel petstore API which is accessible publically.
 
+In the following instance, we're employing a locally saved OpenAPI specification file named 'petstore.json' located in the '/home' directory to generate ABAP code for the sample Petstore API:
+
+```
+./start_abap_gen.sh -i /home/petstore.json 
+```
 
 ## [3 - Usage](#table-of-contents)
 
@@ -137,11 +167,11 @@ An example is shown below:
  -b example_bucket_name
 ```
 
-The -b argument takes the bucket id.\
-The script validates if the bucket id exists or not.\
-To validate and store the files to the give bucket you would need relevant IAM roles listed below:
-- Storage Object Viewer(roles/storage.objectViewer)
-- Storage Object User(roles/storage.objectUser)
+- The -b argument takes the bucket id.
+- The script validates if the bucket id exists or not.
+- To validate and store the files to the give bucket you would need relevant IAM roles listed below:
+  - Storage Object Viewer(roles/storage.objectViewer)
+  - Storage Object User(roles/storage.objectUser)
 
 ### [3.2 - Direct Download](#table-of-contents)
 
@@ -152,7 +182,6 @@ The files will be downloaded to your download director as a zip file, which you 
 In case you wish not to download, the script provides you the location of where the generated files are stored and exits.
 
 In case the download fails, or if you would like to just download again you can run the below script from directory `openapi-abap-gen`
-
 ```
 ./download_client.sh
 ```
@@ -193,17 +222,24 @@ The generated client stubs are built compatible with the framework of ABAP SDK f
 
 There are multiple ways to host your APIs on Google Cloud and the following blog: [Navigating the Cloud API Maze: Apigee, GCP API Gateway, or GCP Cloud Endpoints?](https://medium.com/google-cloud/navigating-the-cloud-api-maze-apigee-api-gateway-or-cloud-endpoints-6bc772b44ff4) serves as a great starting point to understand various options.
 
-### Sneak Peak into possible future Reference Architecture
-We will try to bring out various use-cases and Reference Architectures which will help you realise the true value of Google Cloud as a side-by-side extension platform for developing business solutions.\
-Below is a sneak peak into some of the possible architectures:
+### A Glimpse into Future Possibilities: Reference Architectures
+We'll explore diverse use cases and reference architectures to showcase how Google Cloud can seamlessly extend your SAP capabilities and empower you to build impactful business solutions. Here's a glimpse into some potential architectures you can leverage.
+
 
 #### Function Calling in Gemini
+Gemini's Function Calling feature allows users to define custom functions, generating structured output to call external APIs, enabling interactions with real-time information and various services for comprehensive query responses. You can read more about this feature here: https://ai.google.dev/gemini-api/docs/function-calling
+
+The functions are OpenAPI compatible schemas which the model returns specifying how to call one or more of the declared functions. For such use cases, we can use ABAP SDK Client Generator to generate a SDK compatible client stub.\
+ABAP developers can now use this generated class to seamlessly orchestrate the functional call response from Gemini and call the API using the generator client. 
+Below architecture shows how this could be made possible:
+
 
 ![alt_text](images/ref_arch_gemini_function_calling.jpg "Ref Architecture: Function calling in Gemini")
 
 #### Kafka Integration with BigQuery
+Below is an simplified architecture on how to connect to Kafka, the Open API Generator provides the required code on the ABAP side, which coupled with the foundation layer of ABAP SDK make it seamless to publish and consume from Kafka.
 
-![alt_text](images/ref_arch_kakfa_integration.png "Ref Architecture: Kafka Integration with BigQuery")
+![alt_text](images/ref_arch_kafka_integration.png "Ref Architecture: Kafka Integration with BigQuery")
 
 We will soon add relevant blog links and codelabs to help you get started!
 Till then try exploring and Happy learning!
