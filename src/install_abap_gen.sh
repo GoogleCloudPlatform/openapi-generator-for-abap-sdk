@@ -15,7 +15,7 @@
 #!/bin/bash
 verbose=""
 
-# Constants for version checking (adjust if needed)
+# Constants for version checking
 REQUIRED_JAVA_VERSION="11"
 REQUIRED_MAVEN_VERSION="3.3.4"
 
@@ -36,9 +36,11 @@ check_java() {
             printf "\e[32m%s\e[0m\n" "Java $java_version is installed (version $REQUIRED_JAVA_VERSION or greater)"
         else
             printf "\e[31m%s\e[0m\n" "Command output (ERROR): Java is installed, but not version $REQUIRED_JAVA_VERSION or greater."
+            exit 1
         fi
     else
         printf "\e[31m%s\e[0m\n" "Command output (ERROR): Java is not installed."
+        exit 1
     fi
 }
 
@@ -50,10 +52,28 @@ check_maven() {
             printf "\e[32m%s\e[0m\n" "Maven $mvn_version is installed (version $REQUIRED_MAVEN_VERSION or greater)"
         else
             printf "\e[31m%s\e[0m\n" "Command output (ERROR): Maven is installed, but not version $REQUIRED_MAVEN_VERSION or greater."
+            exit 1
         fi
     else
         printf "\e[31m%s\e[0m\n" "Command output (ERROR): Maven is not installed."
+        exit 1
     fi
+}
+
+# Function to check if GitHub CLI is installed and user has already run gh auth
+check_github_cli() {
+    if ! command -v gh &>/dev/null; then  
+        printf "\e[31m%s\e[0m\n" "Command output (ERROR): GitHub CLI (gh) is not installed. Please install it before running this script."
+        exit 1
+    fi
+
+    # Check if user is already authenticated
+    if ! gh auth status &>/dev/null; then 
+        printf "\e[31m%s\e[0m\n" "Command output (ERROR): You are not authenticated with GitHub CLI. Please run 'gh auth login' before running this script."
+        exit 1
+    fi
+
+    printf "\e[32m%s\e[0m\n" "GitHub CLI (gh) is installed and authenticated"
 }
 
 run_command(){
@@ -81,6 +101,7 @@ run_command(){
         # Command failed
         if [ -n "$error_msg" ]; then
             printf "\e[31m%s\e[0m\n" "$error_msg"
+            exit 1
         fi
         if [ -n "$verbose" ]; then
             # Verbose mode: Display additional details (even on error)
@@ -89,25 +110,6 @@ run_command(){
                 printf "Command output (ERROR):\n%s\n" "$output"
             fi
         fi
-    fi
-}
-
-run_command_old() {
-    local CMD=$1
-    local success_msg=$2
-    local error_msg=$3
-    output=$(${CMD} 2>/dev/null)
-    if [ $? -ne 0 ]; then
-        echo -e "$(tput bold)$(tput setaf 1)ERROR: ${error_msg}$(tput sgr0) $(tput sgr0)"
-        exit 1  # Exit with an error code
-    else
-        echo -e "\n$(tput setaf 2)SUCCESS: ${success_msg}$(tput sgr0) "
-    fi      
-    if [ ! -z "$verbose" ]; then
-        echo "----------------------------------------------------------------"
-        echo "Running Command: ${CMD}"
-        echo "Command Output: "
-        echo "$output"
     fi
 }
 
@@ -120,12 +122,7 @@ verify_prerequisites() {
     add_comment "Checking for Prerequisites.."
     check_java
     check_maven
-}
-
-execute_generator(){
-    add_comment "Execute OpenAPI Generator..."
-    # cd ../../..
-    run_command "java -cp out/generators/abap-gen/target/abap-gen-openapi-generator-1.0.0.jar:openapi-generator-cli.jar org.openapitools.codegen.OpenAPIGenerator generate -g abap-gen -i https://raw.githubusercontent.com/googlemaps/openapi-specification/main/dist/google-maps-platform-openapi3.json -o ./out/maps_output" "Successfully executed OpenAPI Generator!" "Failed to execute OpenAPI generator!"
+    check_github_cli
 }
 
 pull_from_github(){
@@ -136,26 +133,14 @@ pull_from_github(){
     run_command "gh repo clone $github_repo_url" "Git repository cloned successfully!" "Failed to clone Git repository"
 
     add_comment "Reorganizing folder structure..."
-    run_command "rm $github_repo_name/my_file.mustache"
-    run_command "mv $github_repo_name/*.mustache out/generators/abap-gen/src/main/resources/abap-gen"
-    run_command "mv $github_repo_name/*.java out/generators/abap-gen/src/main/java/com/my/company/codegen"
-    run_command "mv $github_repo_name/type_collector.sh out"
-    run_command "mv $github_repo_name/*.sh ." "Successfully completed reorganization!" "Failed to reorganize the repository structure"
-}
-
-create_target_folder(){
-    # create a test folder inside current directory to test functionality.
-    add_comment "Creating Target Folder..."
-
-    run_command "rm -rf $directory"
-    run_command "mkdir $directory" "Successfully created Target Folder!" "Failed to create Target Folder"
-    run_command "cp openapi-generator-cli.jar $directory"
-    cd $directory
+    run_command "mv $github_repo_name/src/*.mustache out/generators/abap-gen/src/main/resources/abap-gen"
+    run_command "mv $github_repo_name/src/*.java out/generators/abap-gen/src/main/java/com/my/company/codegen"
+    run_command "mv $github_repo_name/src/type_collector.sh out"
+    run_command "mv $github_repo_name/src/*.sh ." "Successfully completed reorganization!" "Failed to reorganize the repository structure"
 }
 
 cleanup(){
     add_comment "Perform Cleanup..."
-    rm openapi-generator-cli.jar
     run_command "rm -rf $github_repo_name" "Successfully completed cleanup!" "Failed to Cleanup resources!"    
 }
 
@@ -173,20 +158,19 @@ main() {
     echo "================================================================"
     echo -e "$(tput bold)Install Open API Client Generator for ABAP SDK for Google Cloud$(tput sgr0)"
     echo "================================================================"
-
+    
     add_comment "Run packaged parent generator..."
     run_command "java -jar openapi-generator-cli.jar meta -o out/generators/abap-gen -n abap-gen -p com.my.company.codegen" "Successfully ran packaged parent generator!" "Failed to run packaged parent generator!"
+
     cd out/generators/abap-gen
 
     verify_prerequisites 
     
     cd ../../..
-
+    
     pull_from_github
     cleanup
     echo "================================================================"
 }
 
 main $*
-
-
