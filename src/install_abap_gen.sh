@@ -122,15 +122,15 @@ verify_prerequisites() {
     add_comment "Checking for Prerequisites.."
     check_java
     check_maven
-    check_github_cli
+    #check_github_cli
 }
 
 pull_from_github(){
-    github_repo_url="GoogleCloudPlatform/openapi-generator-for-abap-sdk"
+    github_repo_url="https://github.com/GoogleCloudPlatform/openapi-generator-for-abap-sdk.git"
     github_repo_name="openapi-generator-for-abap-sdk"
 
     add_comment "Cloning github repo..."
-    run_command "gh repo clone $github_repo_url" "Git repository cloned successfully!" "Failed to clone Git repository"
+    run_command "git clone $github_repo_url" "Git repository cloned successfully!" "Failed to clone Git repository"
 
     add_comment "Reorganizing folder structure..."
     run_command "mv $github_repo_name/src/*.mustache out/generators/abap-gen/src/main/resources/abap-gen"
