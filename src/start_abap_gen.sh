@@ -204,7 +204,7 @@ main() {
 	if [[ -n "$bucket_name" ]]; then
 		# Copying ABAP Classes and Interface File to Storage Bucket
 		echo -e "\n Copying ABAP Classes and Interface files to storage bucket: ${bucket_name}"
-		gsutil cp gen_output/src/org/openapitools/api/*.abap gs://${bucket_name}
+		gcloud storage cp gen_output/src/org/openapitools/api/*.abap gs://${bucket_name}
 
 		# Create an interface file with timestamp as suffic
     	timestamp=$(date +'%Y-%m-%d_%H-%M-%S')
@@ -213,7 +213,7 @@ main() {
     	intf_filename="interface"_"${timestamp}.txt" 
 
 		# Copy Interface File to Storage Bucket
-		gsutil cp interface.txt gs://${bucket_name}/${intf_filename}
+		gcloud storage cp interface.txt gs://${bucket_name}/${intf_filename}
 	fi
 
 	echo -e "\nDo you like to download files... (y/n)"
