@@ -5,10 +5,10 @@ TYPES:
 {{#vars}}{{#-first}}BEGIN OF {{/-first}}{{/vars}}{{newClassVarName}}{{#vars}}{{#-first}},{{/-first}}{{/vars}}{{^vars}} TYPE {{dataType}}.{{/vars}}
 {{#vars}}
 {{^isArray}}
-{{baseName}} TYPE {{dataType}}, {{{description}}}
+{{baseName}} TYPE {{dataType}}, {{#description}}"{{description}}{{/description}}
 {{/isArray}}
 {{#isArray}}
-{{baseName}} TYPE STANDARD TABLE OF {{complexType}} WITH NON-UNIQUE DEFAULT KEY, {{{description}}}
+{{baseName}} TYPE STANDARD TABLE OF {{complexType}} WITH NON-UNIQUE DEFAULT KEY, {{#description}}"{{description}}{{/description}}
 {{/isArray}}
 {{/vars}}
 {{#vars}}
