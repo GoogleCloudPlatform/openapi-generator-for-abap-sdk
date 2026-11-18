@@ -66,8 +66,23 @@
          String abapApiNameStr = (String) abapApiName;
          abapApiNameStr = formatIntferaceName(abapApiNameStr);
          additionalProperties.put("appName", abapApiNameStr);
+         results.put("appName", abapApiNameStr);
          intfName = abapApiNameStr;
        }
+     } else {
+       results.put("appName", intfName);
+     }
+     Object basePathObj = results.get("basePath");
+     if (basePathObj instanceof String) {
+       results.put("basePath", escapeUnsafeCharacters((String) basePathObj));
+     }
+     Object versionObj = results.get("version");
+     if (versionObj instanceof String) {
+       results.put("version", escapeUnsafeCharacters((String) versionObj));
+     }
+     Object importPathObj = ops.get("importPath");
+     if (importPathObj instanceof String) {
+       ops.put("importPath", escapeUnsafeCharacters((String) importPathObj));
      }
  
      List<CodegenOperation> opList = ops.getOperation();
@@ -149,19 +164,22 @@
          }
        }
  
-       String pathStr = co.path;
-       String extractedValue = "";
-       String modifiedValue = "";
-       // Extracts path parameters from path string
-       List<String> extractedValues = extractFromCurlyBraces(pathStr);
-       for (String eValue : extractedValues) {
-         extractedValue = eValue.toString();
-         modifiedValue = editName(extractedValue, "iv_p_");
-         pathStr = Pattern.compile(extractedValue).matcher(pathStr).replaceAll(modifiedValue);
+       String pathStr = co.path != null ? co.path : "";
+       // Sanitize path segments and extract path parameters inside curly braces.
+       // Literal path segments are restricted to [A-Za-z0-9/_.-] to block ABAP
+       // string-template delimiters (|, \, unmatched { or }) and statement injection.
+       Matcher pathMatcher = Pattern.compile("\\{([^{}]+)\\}").matcher(pathStr);
+       StringBuilder sanitizedPath = new StringBuilder();
+       int lastEnd = 0;
+       while (pathMatcher.find()) {
+         String literalSegment = pathStr.substring(lastEnd, pathMatcher.start());
+         sanitizedPath.append(literalSegment.replaceAll("[^A-Za-z0-9/_.-]", ""));
+         String modifiedValue = editName(pathMatcher.group(1), "iv_p_");
+         sanitizedPath.append("{ ").append(modifiedValue).append(" }");
+         lastEnd = pathMatcher.end();
        }
-       pathStr = Pattern.compile("\\{").matcher(pathStr).replaceAll("{ ");
-       pathStr = Pattern.compile("\\}").matcher(pathStr).replaceAll(" }");
-       co.path = pathStr;
+       sanitizedPath.append(pathStr.substring(lastEnd).replaceAll("[^A-Za-z0-9/_.-]", ""));
+       co.path = sanitizedPath.toString();
      }
  
      return results;
@@ -181,6 +199,9 @@
          cm.classVarName = cm.name;
          cm.classFilename = cm.name;
        }
+       if (cm.classFilename != null) {
+         cm.classFilename = escapeUnsafeCharacters(cm.classFilename);
+       }
  
        for (CodegenProperty param : cm.vars) {
          if (languageSpecificPrimitives.contains(param.dataType) == false) {
@@ -196,7 +217,8 @@
              param.complexType = editType(param.complexType, "ty_");
          }
  
-         param.description = extractDescription(param.unescapedDescription, 60);
+         String extractedDescription = extractDescription(param.unescapedDescription, 60);
+         param.description = extractedDescription.isEmpty() ? null : extractedDescription;
        }
  
        String newClassVarName = editType(cm.classVarName, "ty_");
@@ -389,11 +411,16 @@
    // Edits the names to suit ABAP naming convention
    // for example, openAPIAbapGenerator can become ty_openAPI_abap_generator
    public String editName(String name, String prefix) {
+     if (name == null) {
+       return "";
+     }
      // for reserved word or word starting with number, append _
      // Change the naming convention from camelCase to snake_case
      int shortenedNameLength = 30;
      name = convertCamelToSnake(name);
      name = convertSentenceToSnake(name);
+     name = name.replaceAll("[^A-Za-z0-9_]", "_");
+     name = name.replaceAll("_+", "_");
      // Add the corresponding prefices to the names
      name = prefix + name;
      // If the names are above 30 characters, truncate them to 30 and uniquify
@@ -422,6 +449,15 @@
      return newName;
    }
  
+   @Override
+   public String toModelFilename(String name) {
+     String filename = super.toModelFilename(name);
+     if (filename == null) {
+       return null;
+     }
+     return escapeUnsafeCharacters(filename).replaceAll("[\\s/\\\\]", "_");
+   }
+
    /**
     * Location to write model files. You can use the modelPackage() as defined when
     * the class is
@@ -455,7 +491,10 @@
     */
    @Override
    public String escapeUnsafeCharacters(String input) {
-     return input;
+     if (input == null) {
+       return null;
+     }
+     return input.replaceAll("[\\r\\n\\t]", " ").replaceAll("[|`]", "");
    }
  
    /**
@@ -464,9 +503,12 @@
     * @param input String to be cleaned up
     * @return string with quotation mark removed or escaped
     */
+   @Override
    public String escapeQuotationMark(String input) {
-     // return input.replace("\"", "\\\"");
-     return input;
+     if (input == null) {
+       return null;
+     }
+     return input.replace("\"", "").replace("'", "''");
    }
  
    @Override
@@ -480,12 +522,12 @@
      if (text == null) {
        return "";
      }
+     text = text.replaceAll("[\\r\\n\"]", " ");
  
      String[] sentences = text.split("\\."); // Split into sentences
  
      StringBuilder description = new StringBuilder();
      int currentLength = 0;
-     String descrStr = "";
  
      for (String sentence : sentences) {
        // Remove leading/trailing spaces and add period back
@@ -504,21 +546,23 @@
        currentLength += sentence.length();
      }
  
-     StringBuilder stringBuilder = new StringBuilder();
-     stringBuilder.append("\"");
-     stringBuilder.append(description.toString());
-     descrStr = stringBuilder.toString();
-     return descrStr;
+     return description.toString();
    }
  
    public static String escapeSpecialCharacters(String text) {
-     String escapedString = Pattern.compile("[*&$#%/-]") // Define the characters to replace
+     if (text == null) {
+       return "";
+     }
+     String escapedString = Pattern.compile("[^A-Za-z0-9_]") // Define the characters to replace
          .matcher(text)
          .replaceAll("_");
      return escapedString;
    }
  
    public static String formatIntferaceName(String text) {
+     if (text == null) {
+       return "";
+     }
      // First three characters would be ZIF_
      int maxLength = 26;
      String name = "";
@@ -529,7 +573,7 @@
      if (name.length() > maxLength) {
        name = name.substring(0, maxLength);
      }
-     String escapedString = Pattern.compile("[*&$#%/-]") // Define the characters to replace
+     String escapedString = Pattern.compile("[^A-Za-z0-9_]") // Define the characters to replace
          .matcher(name)
          .replaceAll("_");
  
